@@ -1,16 +1,16 @@
 <template>
     <div class="pt-5">
         <div class="container">
-            <button class="btn btn-primary">連接藍芽</button>
+            <button class="btn btn-primary" @click="blueTooth()"><i class="fa fa-bluetooth"></i>連接藍牙</button>
             <p>目前連接裝置: {{ deviceName }}</p>
 
             <div class="form-floating mb-3 mt-3">
-                <input type="text" class="form-control" id="ssid" placeholder="Enter WiFi SSID" name="ssid" :disabled="!blueToothConnected">
+                <input type="text" class="form-control" id="ssid" placeholder="Enter WiFi SSID" name="ssid" ref="wifi_ssid" :disabled="!blueToothConnected">
                 <label for="email">WiFi SSID</label>
             </div>
 
             <div class="form-floating mt-3 mb-3">
-                <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="pwd" :disabled="!blueToothConnected">
+                <input type="text" class="form-control" id="pwd" placeholder="Enter password" name="pwd" ref="wifi_pwd" :disabled="!blueToothConnected">
                 <label for="pwd">Password</label>
             </div>
 
@@ -20,7 +20,7 @@
             </div>
 
             <div>
-                <button class="btn btn-success" :disabled="!blueToothConnected">送出並連接</button>
+                <button class="btn btn-success" :disabled="!blueToothConnected" @click="sendWifiData()">送出並連接</button>
                 <button class="btn btn-danger" onclick="history.go(-1)">取消</button>
             </div>
 
@@ -30,7 +30,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import mqtt from 'mqtt/dist/mqtt.js';
+// import mqtt from 'mqtt/dist/mqtt.js';
 
 onMounted(()=>{
     var appInventorInput = window.AppInventor.getWebViewString();
@@ -39,25 +39,49 @@ onMounted(()=>{
         deviceName.value = data['name'];
     }
 
-    const client = mqtt.connect("ws://test.mosquitto.org:8080") // you add a ws:// url here
-    client.on('connect', ()=>{
-        console.log('connected.');
-        client.subscribe("ghnmwpioefmajqjhidhcwe/ttest")
-        client.on("message", function (topic, payload) {
-            console.log(payload);
-            console.log([topic, payload].join(": "));
-            // client.end()
-        });
+    // const client = mqtt.connect("wss://test.mosquitto.org:8081") // you add a ws:// url here
+    // client.on('connect', ()=>{
+    //     console.log('connected.');
+    //     client.subscribe("ghnmwpioefmajqjhidhcwe/ttest")
+    //     client.on("message", function (topic, payload) {
+    //         console.log(payload);
+    //         console.log([topic, payload].join(": "));
+    //         // client.end()
+    //     });
 
-        client.publish("ghnmwpioefmajqjhidhcwe/ttest", "hello");    
-    });
+    //     client.publish("ghnmwpioefmajqjhidhcwe/ttest", "hello");    
+    // });
 
 })
 
-const blueToothConnected = ref(false);
+const blueToothConnected = ref(true);
 const deviceName = ref("尚未連接裝置");
 
+const wifi_ssid = ref();
+const wifi_pwd = ref();
+
 console.log(blueToothConnected.value);
+
+const blueTooth = ()=>{
+    window.AppInventor.setWebViewString(
+        JSON.stringify({
+            function_name: "scanBluetooth"
+        })
+    );
+}
+
+const sendWifiData = ()=>{
+    let data = String.fromCharCode(wifi_ssid.value.value.length) + wifi_ssid.value.value + String.fromCharCode(wifi_pwd.value.value.length) + wifi_pwd.value.value;
+    console.log(data);
+    console.log(data.length)
+
+    window.AppInventor.setWebViewString(
+        JSON.stringify({
+            function_name: "sendWiFi",
+            wifi_data: data
+        })
+    );
+}
 </script>
 
 <style>
