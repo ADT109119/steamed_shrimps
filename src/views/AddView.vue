@@ -30,6 +30,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
+import mqtt from 'mqtt/dist/mqtt.js';
 
 onMounted(()=>{
     var appInventorInput = window.AppInventor.getWebViewString();
@@ -37,6 +38,20 @@ onMounted(()=>{
         let data = JSON.parse(appInventorInput);
         deviceName.value = data['name'];
     }
+
+    const client = mqtt.connect("ws://test.mosquitto.org:8080") // you add a ws:// url here
+    client.on('connect', ()=>{
+        console.log('connected.');
+        client.subscribe("ghnmwpioefmajqjhidhcwe/ttest")
+        client.on("message", function (topic, payload) {
+            console.log(payload);
+            console.log([topic, payload].join(": "));
+            // client.end()
+        });
+
+        client.publish("ghnmwpioefmajqjhidhcwe/ttest", "hello");    
+    });
+
 })
 
 const blueToothConnected = ref(false);

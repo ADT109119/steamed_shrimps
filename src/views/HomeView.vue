@@ -40,7 +40,6 @@
 
 <script setup>
 // import HelloWorld from '@/components/HelloWorld.vue'
-import mqtt from 'mqtt/dist/mqtt.min.js';
 import tempDisplayer from '@/components/tempDisplayer.vue';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -56,18 +55,18 @@ const gotoPath = (newPath)=>{
     router.push(newPath);
 }
 
-const client = mqtt.connect("ws://test.mosquitto.org:8080") // you add a ws:// url here
-client.on('connect', ()=>{
-    console.log('connected.');
-    client.subscribe("ghnmwpioefmajqjhidhcwe/ttest")
-    client.on("message", function (topic, payload) {
-        console.log(payload);
-        console.log([topic, payload].join(": "));
-        // client.end()
-    });
+// const client = mqtt.connect("ws://test.mosquitto.org:8080") // you add a ws:// url here
+// client.on('connect', ()=>{
+//     console.log('connected.');
+//     client.subscribe("ghnmwpioefmajqjhidhcwe/ttest")
+//     client.on("message", function (topic, payload) {
+//         console.log(payload);
+//         console.log([topic, payload].join(": "));
+//         // client.end()
+//     });
 
-    client.publish("ghnmwpioefmajqjhidhcwe/ttest", "hello");    
-});
+//     client.publish("ghnmwpioefmajqjhidhcwe/ttest", "hello");    
+// });
 
 </script>
 
