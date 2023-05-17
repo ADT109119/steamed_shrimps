@@ -7,16 +7,21 @@
     <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
 
     <div class="container pt-3">
-        <tempDisplayer temp="35" water="70" />
-        <tempDisplayer temp="30" water="90" />
+        <tempDisplayer v-for="(item, index) in mqttData" :key="index" :temp="item.t" :water="item.h" :time="item.time" />
+        <!-- <tempDisplayer temp="30" water="90" />
         <tempDisplayer temp="28" water="70" />
         <tempDisplayer temp="25" water="30" />
         <tempDisplayer temp="20" water="68" />
         <tempDisplayer temp="10" water="70" />
-        <tempDisplayer temp="0" water="68" />
+        <tempDisplayer temp="0" water="68" /> -->
     </div>
-
-    <div class="backgroundText">您目前沒有任何裝置<br>請點選右下角的【+】圖標<br>以新增裝置</div>
+    
+    <div class="backgroundText">
+        <div v-show="checkFiveSecond && !checkHaveTemp">
+            您目前沒有任何裝置<br>請點選右下角的【+】圖標<br>以新增裝置
+        </div>
+        <div v-show="!checkFiveSecond && !checkHaveTemp" class="spinner-border text-muted"></div>
+    </div>
 
     <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
 
@@ -41,8 +46,9 @@
 <script setup>
 // import HelloWorld from '@/components/HelloWorld.vue'
 import tempDisplayer from '@/components/tempDisplayer.vue';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import mqtt from 'mqtt/dist/mqtt.js';
 
 const listButton = ref();
 const router = useRouter();
@@ -55,18 +61,35 @@ const gotoPath = (newPath)=>{
     router.push(newPath);
 }
 
-// const client = mqtt.connect("ws://test.mosquitto.org:8080") // you add a ws:// url here
-// client.on('connect', ()=>{
-//     console.log('connected.');
-//     client.subscribe("ghnmwpioefmajqjhidhcwe/ttest")
-//     client.on("message", function (topic, payload) {
-//         console.log(payload);
-//         console.log([topic, payload].join(": "));
-//         // client.end()
-//     });
+const checkHaveTemp = ref(false);
+const checkFiveSecond = ref(false);
+onMounted(()=>{
+    setTimeout(()=>{
+        checkFiveSecond.value = true;
+    }, 5000)
+})
 
-//     client.publish("ghnmwpioefmajqjhidhcwe/ttest", "hello");    
-// });
+const mqttData = ref({});
+
+const client = mqtt.connect("ws://test.mosquitto.org:8080") // you add a ws:// url here
+client.on('connect', ()=>{
+    console.log('connected.');
+    client.subscribe("ghnmwpioefmajqjhidhcwe/ttest")
+    client.on("message", function (topic, payload) {
+        let temp = JSON.parse(payload)
+        temp["time"] = new Date().toISOString();
+        console.log(temp)
+        mqttData.value[topic] = temp;
+        checkHaveTemp.value = true;
+        // console.log(topic);
+        // console.log(payload);
+        console.log([topic, payload].join(": "));
+        // console.log(JSON.parse(payload));
+        // client.end()
+    });
+
+    // client.publish("ghnmwpioefmajqjhidhcwe/ttest", "hello");
+});
 
 </script>
 

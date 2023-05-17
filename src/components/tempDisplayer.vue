@@ -1,9 +1,13 @@
 <template>
 
 <div class="displayer">
-    <span class="name">asdasdasd</span>
-    <donutChart max="40" min="0" :value="temp" color-change-mode="true">{{ props.temp + "℃" }}</donutChart>
-    <donutChart max="100" min="0" :value="water">{{ props.water + "%" }}</donutChart>
+    <div>
+        <span class="name">asdasdasd</span>
+        <span class="time">最後更新時間:<br>{{ props.time }}</span>
+    </div>
+    
+    <donutChart max="40" min="0" :value="temp" color-change-mode="true">{{ Number(props.temp).toFixed(2) + "℃" }}</donutChart>
+    <donutChart max="100" min="0" :value="water">{{ Number(props.water).toFixed(2) + "%" }}</donutChart>
 </div>
 
 </template>
@@ -20,6 +24,10 @@ const props = defineProps({
     water:{
         type: Number,
         default: 50
+    },
+    time:{
+        type: String,
+        default: "xxxx-xx-xx"
     }
 })
 
@@ -30,7 +38,7 @@ const props = defineProps({
 .displayer{
     /* background: rgb(241, 245, 248); */
     background: white;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     border-radius: 1rem;
     padding: 1rem;
     display: grid;
@@ -39,10 +47,11 @@ const props = defineProps({
     transition: 0.2s;
     margin-bottom: 1rem;
 }
-
+/* 
 .displayer:hover{
     opacity: 0.8;
-}
+} 
+*/
 
 .displayer .name{
     color: rgb(60, 60, 60);
@@ -50,6 +59,12 @@ const props = defineProps({
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+.displayer .time{
+    color: rgb(150, 150, 150);
+    font-weight: lighter;
+    font-size: 1rem;
 }
 
 </style>

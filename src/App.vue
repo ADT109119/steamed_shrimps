@@ -26,7 +26,7 @@ body{
   width: 100vw;
   min-height: 100vh;
   /* overflow: hidden; */
-  background-color: rgb(245, 248, 253);
+  background-color: rgb(240, 240, 245);
   z-index: 0;
 }
 
