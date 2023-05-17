@@ -71,7 +71,7 @@ onMounted(()=>{
 
 const mqttData = ref({});
 
-const client = mqtt.connect("ws://test.mosquitto.org:8080") // you add a ws:// url here
+const client = mqtt.connect("wss://test.mosquitto.org:8080") // you add a ws:// url here
 client.on('connect', ()=>{
     console.log('connected.');
     client.subscribe("ghnmwpioefmajqjhidhcwe/ttest")
