@@ -3,7 +3,7 @@
 <div class="displayer">
     <div>
         <span class="name">asdasdasd</span>
-        <span class="time">最後更新時間:<br>{{ props.time }}</span>
+        <span class="time">最後更新時間:<br>{{ props.time.replace("T", " ").split(".")[0] }}</span>
     </div>
     
     <donutChart max="40" min="0" :value="temp" color-change-mode="true">{{ Number(props.temp).toFixed(2) + "℃" }}</donutChart>
@@ -64,7 +64,7 @@ const props = defineProps({
 .displayer .time{
     color: rgb(150, 150, 150);
     font-weight: lighter;
-    font-size: 1rem;
+    font-size: 0.5rem;
 }
 
 </style>
