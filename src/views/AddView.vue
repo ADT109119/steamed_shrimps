@@ -33,11 +33,14 @@ import { onMounted, ref } from 'vue';
 // import mqtt from 'mqtt/dist/mqtt.js';
 
 onMounted(()=>{
-    var appInventorInput = window.AppInventor.getWebViewString();
-    if (appInventorInput.length > 0) {
-        let data = JSON.parse(appInventorInput);
-        deviceName.value = data['name'];
-    }
+    setInterval(() => {
+        var appInventorInput = window.AppInventor.getWebViewString();
+        if (appInventorInput.length > 0) {
+            let data = JSON.parse(appInventorInput);
+            deviceName.value = data['name'];
+        }
+    }, 1000);
+    
 
     // const client = mqtt.connect("wss://test.mosquitto.org:8081") // you add a ws:// url here
     // client.on('connect', ()=>{
