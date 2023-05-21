@@ -16,7 +16,7 @@
             </div>
 
             <div class="form-floating mt-3 mb-3">
-                <input type="text" class="form-control" id="deviceName" placeholder="Enter device name" name="deviceName" :disabled="!blueToothConnected">
+                <input type="text" class="form-control" id="deviceName" placeholder="Enter device name" ref="device_name" name="deviceName" :disabled="!blueToothConnected">
                 <label for="deviceName">裝置名稱(顯示在APP的名稱)</label>
             </div>
 
@@ -71,6 +71,7 @@ const blueToothConnected = ref(true);
 
 const wifi_ssid = ref();
 const wifi_pwd = ref();
+const device_name = ref();
 
 console.log(blueToothConnected.value);
 
@@ -83,7 +84,7 @@ const blueTooth = ()=>{
 }
 
 const sendWifiData = ()=>{
-    let data = String.fromCharCode(wifi_ssid.value.value.length) + wifi_ssid.value.value + String.fromCharCode(wifi_pwd.value.value.length) + wifi_pwd.value.value;
+    let data = String.fromCharCode(wifi_ssid.value.value.length) + wifi_ssid.value.value + String.fromCharCode(wifi_pwd.value.value.length) + wifi_pwd.value.value + String.fromCharCode(device_name.value.value.length) + device_name.value.value;
     console.log(data);
     console.log(data.length)
 
