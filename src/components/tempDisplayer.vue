@@ -2,7 +2,7 @@
 
 <div class="displayer">
     <div>
-        <span class="name">asdasdasd</span>
+        <span class="name">{{ props.name }}</span>
         <span class="time">最後更新時間:<br>{{ props.time.replace("T", " ").split(".")[0] }}</span>
     </div>
     
@@ -28,6 +28,10 @@ const props = defineProps({
     time:{
         type: String,
         default: "xxxx-xx-xx"
+    },
+    name:{
+        type: String,
+        default: "未命名"
     }
 })
 

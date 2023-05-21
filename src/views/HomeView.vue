@@ -7,7 +7,7 @@
     <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
 
     <div class="container pt-3">
-        <tempDisplayer v-for="(item, index) in mqttData" :key="index" :temp="item.t" :water="item.h" :time="item.time" />
+        <tempDisplayer v-for="(item, index) in mqttData" :key="index" :temp="item.t" :water="item.h" :time="item.time" :name="item.name" />
         <!-- <tempDisplayer temp="30" water="90" />
         <tempDisplayer temp="28" water="70" />
         <tempDisplayer temp="25" water="30" />
@@ -30,9 +30,9 @@
         <i class="fa fa-close closeButton"></i>
     </span>
 
-    <span class="settingButton button" @click="closeList(); gotoPath('/setting')">
+    <!-- <span class="settingButton button" @click="closeList(); gotoPath('/setting')">
         <i class="fa fa-gear"></i>
-    </span>
+    </span> -->
 
     <span class="addButton button" @click="closeList(); gotoPath('/add')">
         <i class="cross"></i>
@@ -46,7 +46,7 @@
 <script setup>
 // import HelloWorld from '@/components/HelloWorld.vue'
 import tempDisplayer from '@/components/tempDisplayer.vue';
-import { onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import mqtt from 'mqtt/dist/mqtt.js';
 
@@ -77,7 +77,9 @@ client.on('connect', ()=>{
     client.subscribe("ghnmwpioefmajqjhidhcwe/ttest")
     client.on("message", function (topic, payload) {
         let temp = JSON.parse(payload)
-        temp["time"] = new Date().toISOString();
+        var d = new Date();
+        d.setUTCHours(d.getUTCHours() +8)
+        temp["time"] = d.toISOString();
         console.log(temp)
         mqttData.value[topic] = temp;
         checkHaveTemp.value = true;
@@ -90,6 +92,10 @@ client.on('connect', ()=>{
 
     // client.publish("ghnmwpioefmajqjhidhcwe/ttest", "hello");
 });
+
+onBeforeUnmount(()=>{
+    client.end();
+})
 
 </script>
 

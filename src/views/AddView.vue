@@ -98,4 +98,7 @@ const sendWifiData = ()=>{
 </script>
 
 <style>
+.btn{
+    margin: 0 0.5rem;
+}
 </style>
