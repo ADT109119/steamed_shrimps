@@ -2,7 +2,8 @@
     <div class="pt-5">
         <div class="container">
             <button class="btn btn-primary" @click="blueTooth()"><i class="fa fa-bluetooth"></i>連接藍牙</button>
-            <p>目前連接裝置: {{ deviceName }}</p>
+            <p>目前連接裝置: <span id="displayDevice">尚未連接裝置</span></p>
+            <!-- <input type="text" v-model="tempData" /> -->
 
             <div class="form-floating mb-3 mt-3">
                 <input type="text" class="form-control" id="ssid" placeholder="Enter WiFi SSID" name="ssid" ref="wifi_ssid" :disabled="!blueToothConnected">
@@ -29,16 +30,20 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 // import mqtt from 'mqtt/dist/mqtt.js';
 
+// const tempData = ref();
+
+var interval;
 onMounted(()=>{
-    setInterval(() => {
-        var appInventorInput = window.AppInventor.getWebViewString();
-        if (appInventorInput.length > 0) {
-            let data = JSON.parse(appInventorInput);
-            deviceName.value = data['name'];
-        }
+    interval = setInterval(() => {
+        // console.log(tempData.value);
+        // var appInventorInput = window.AppInventor.getWebViewString();
+        // if (appInventorInput.length > 0) {
+        //     let data = JSON.parse(appInventorInput);
+        //     deviceName.value = data['name'];
+        // }
     }, 1000);
     
 
@@ -57,8 +62,12 @@ onMounted(()=>{
 
 })
 
+onBeforeUnmount(()=>{
+    clearInterval(interval);
+})
+
 const blueToothConnected = ref(true);
-const deviceName = ref("尚未連接裝置");
+// const deviceName = ref("尚未連接裝置");
 
 const wifi_ssid = ref();
 const wifi_pwd = ref();
