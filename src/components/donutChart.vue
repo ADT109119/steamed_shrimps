@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import { defineProps, onMounted, ref } from 'vue';
+import { defineProps, onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
     max: Number,
@@ -22,10 +22,20 @@ const chart = ref();
 console.log(props.value/(props.max-props.min) * 100)
 
 onMounted(()=>{
+    changeDonutChart();
+})
+
+const changeDonutChart = ()=>{
     let p = (props.value-props.min)/(props.max-props.min);
     chart.value.style.setProperty("--p", p * 100);
     if(props.colorChangeMode)
         chart.value.style.setProperty("--c", 'hsl('+ Math.floor(230-250*p) +'deg, 100%, 50%)');
+
+}
+
+watch(()=>props.value, (newVal)=>{
+    console.log(newVal)
+    changeDonutChart();
 })
 
 </script>

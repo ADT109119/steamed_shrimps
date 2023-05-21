@@ -6,8 +6,8 @@
         <span class="time">最後更新時間:<br>{{ props.time.replace("T", " ").split(".")[0] }}</span>
     </div>
     
-    <donutChart max="40" min="0" :value="temp" color-change-mode="true">{{ Number(props.temp).toFixed(2) + "℃" }}</donutChart>
-    <donutChart max="100" min="0" :value="water">{{ Number(props.water).toFixed(2) + "%" }}</donutChart>
+    <donutChart max="40" min="0" :value="props.temp" color-change-mode="true">{{ Number(props.temp).toFixed(2) + "℃" }}</donutChart>
+    <donutChart max="100" min="0" :value="props.water">{{ Number(props.water).toFixed(2) + "%" }}</donutChart>
 </div>
 
 </template>
