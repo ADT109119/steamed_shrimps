@@ -17,17 +17,24 @@ body{
 }
 
 #app {
-  position: relative;
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  width: 100vw;
-  min-height: 100vh;
-  /* overflow: hidden; */
-  background-color: rgb(240, 240, 245);
-  z-index: 0;
+    position: relative;
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #2c3e50;
+    width: 100vw;
+    min-height: 100vh;
+    /* overflow: hidden; */
+    background: rgb(240, 240, 245);
+    background-image:
+        linear-gradient(rgba(150,150,150,.1) 1px, transparent 0),
+        linear-gradient(90deg, rgba(150,150,150,.1) 1px, transparent 0);
+    background-size: 15px 15px, 15px 15px;
+
+    background-position: top;
+
+    z-index: 0;
 }
 
 nav {
