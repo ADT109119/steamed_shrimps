@@ -2,7 +2,6 @@
 #include <PubSubClient.h>
 #include <EEPROM.h>
 #include <DHT.h>
-// #include <Adafruit_NeoPixel.h>
 
 
 const char* mqtt_server = "test.mosquitto.org";
@@ -11,8 +10,6 @@ PubSubClient client(espClient);
 unsigned long lastMsg = 0;
 #define MSG_BUFFER_SIZE	(100)
 char msg[MSG_BUFFER_SIZE];
-#define MQTT_TOPIC_BUFFER_SIZE (100)
-char mqttTopic[MQTT_TOPIC_BUFFER_SIZE];
 int value = 0;
 unsigned long lastBlueToothMsg = 0;
 
@@ -33,24 +30,18 @@ int length = 0;
 bool connected2Wifi = false;
 char* ssid = "";
 char* password = "";
-char* deviceName = "default";
-char* userId = "steamedShrimpsDefault";
+char* deviceName = "";
 char tempInput[64] = "";
 char tempPwdInput[64] = "";
-char tempUserId[65] = "";
 char tempDeviceName[64] = "";
 #define SSID_ADDR 0
 #define PASSWORD_ADDR 34
-#define USER_ID_ADDR 100
-#define DEVICE_NAME_ADDR 167
+#define DEVICE_NAME_ADDR 100
 
 //溫濕度感測
-#define LED_PIN 6
-#define LED_COUNT 1
-#define DHT_PIN 7
-#define DHT_TYPE DHT11
-DHT dht(DHT_PIN, DHT_TYPE);
-// Adafruit_NeoPixel pixels(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+#define DHTTYPE DHT11 // DHT 11
+uint8_t DHTPIN = D6;
+DHT dht(DHTPIN, DHTTYPE);
 
 
 void clearArr(char* arr, int len){
@@ -76,14 +67,6 @@ char* readFromEEPROM2(int Addr){
 }
 
 char* readFromEEPROM3(int Addr){
-  static char arr[64];
-  for(int i = Addr ; i < EEPROM.read(Addr)+Addr ; i++){
-    arr[i-Addr] = EEPROM.read(i+1);
-  }
-  return arr;
-}
-
-char* readFromEEPROM4(int Addr){
   static char arr[64];
   for(int i = Addr ; i < EEPROM.read(Addr)+Addr ; i++){
     arr[i-Addr] = EEPROM.read(i+1);
@@ -131,7 +114,7 @@ void setup_wifi(int mode) {
 
   if(WiFi.status() == WL_CONNECTED)
     connected2Wifi = true;
-  
+
 
   randomSeed(micros());
 
@@ -192,17 +175,12 @@ void setup() {
   // Serial.println(readFromEEPROM(SSID_ADDR));
   // Serial.print("PWD: ");
   // Serial.println(readFromEEPROM(PASSWORD_ADDR));
-  
-  // pixels.begin();
-  // pixels.setBrightness(255);
-  // pixels.show();
 
   EEPROM.begin(256);
 
   // ssid = readFromEEPROM(SSID_ADDR);
   // password = readFromEEPROM(PASSWORD_ADDR);
-  userId = readFromEEPROM3(USER_ID_ADDR);
-  deviceName = readFromEEPROM4(DEVICE_NAME_ADDR);
+  deviceName = readFromEEPROM3(DEVICE_NAME_ADDR);
   Serial.println(deviceName);
 
   delay(1000);
@@ -297,14 +275,14 @@ void loop() {
         length = (int)val;
         Serial.println(length);
 
-        EEPROM.write(USER_ID_ADDR, length);
+        EEPROM.write(DEVICE_NAME_ADDR, length);
         inputIndex = 0;
         break;
 
       case 5:
         Serial.println(inputIndex);
-        tempUserId[inputIndex] = val;
-        EEPROM.write(USER_ID_ADDR + inputIndex+1, (int)val);
+        tempDeviceName[inputIndex] = val;
+        EEPROM.write(DEVICE_NAME_ADDR + inputIndex+1, (int)val);
         inputIndex++;
         if(inputIndex+1 > length){
           mode = 0;
@@ -315,13 +293,13 @@ void loop() {
           // password = readFromEEPROM(PASSWORD_ADDR);
           Serial.println(readFromEEPROM(SSID_ADDR));
           Serial.println(readFromEEPROM(PASSWORD_ADDR));
-          Serial.println(readFromEEPROM(USER_ID_ADDR));
+          Serial.println(readFromEEPROM(DEVICE_NAME_ADDR));
           // strcat(password, tempPwdInput);
           setup_wifi(1);
           // Serial.println(password);
         }
         break;
-        
+
     }
     // Serial.println(mode);
     // Serial.println(ssid);
@@ -348,67 +326,15 @@ void loop() {
     if (now - lastMsg > 5000) {
       float h = dht.readHumidity();
       float t = dht.readTemperature();
-      // uint32_t color = getTemperatureColor(h);
-      // breathe(color, 5000);
+
       lastMsg = now;
       ++value;
       snprintf (msg, MSG_BUFFER_SIZE, "{\"t\":\"%f\", \"h\":\"%f\", \"name\":\"%s\"}", t, h, deviceName);
       // Serial.print("Publish message: ");
       // Serial.println(msg);
-      snprintf(mqttTopic, MQTT_TOPIC_BUFFER_SIZE, "steamedshrimp/%s/%s", userId, deviceName);
-      client.publish(mqttTopic, msg);
-      // client.publish("ghnmwpioefmajqjhidhcwe/ttest", msg);
+      client.publish("ghnmwpioefmajqjhidhcwe/ttest", msg);
     }
 
   }
 
 }
-
-/*
-void breathe(uint32_t color, int duration) {
-  int brightness = 0;
-  int fadeAmount = 5;
-  int delayTime = duration / 255;
-
-  while (brightness <= 255) {
-    for(int i=0; i<LED_COUNT; i++) {
-      pixels.setPixelColor(i, pixels.gamma32(pixels.Color(
-        (brightness * ((color >> 16) & 0xFF)) / 255,
-        (brightness * ((color >> 8) & 0xFF)) / 255,
-        (brightness * (color & 0xFF)) / 255
-      )));
-    }
-    pixels.show();
-    brightness += fadeAmount;
-    delay(delayTime);
-  }
-
-  while (brightness >= 0) {
-    for(int i=0; i<LED_COUNT; i++) {
-      pixels.setPixelColor(i, pixels.gamma32(pixels.Color(
-        (brightness * ((color >> 16) & 0xFF)) / 255,
-        (brightness * ((color >> 8) & 0xFF)) / 255,
-        (brightness * (color & 0xFF)) / 255
-      )));
-    }
-    pixels.show();
-    brightness -= fadeAmount;
-    delay(delayTime);
-  }
-}
-
-uint32_t getTemperatureColor(float temperature) {
-  if (temperature >= 40.0) {
-    return pixels.Color(255, 0, 0); // 紅色
-  } else if (temperature <= 10.0) {
-    return pixels.Color(0, 0, 255); // 藍色
-  } else {
-    int green = map((int)temperature, 10, 40, 0, 255);
-    return pixels.Color(
-      (255 - green), // 紅色通道
-      green, // 綠色通道
-      0 // 藍色通道
-    );
-  }
-}
-*/
