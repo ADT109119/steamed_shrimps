@@ -16,8 +16,8 @@
             </div>
 
             <div class="form-floating mt-3 mb-3">
-                <input type="text" class="form-control" id="deviceName" placeholder="Enter device name" ref="device_name" name="deviceName" :disabled="!blueToothConnected">
-                <label for="deviceName">裝置名稱(顯示在APP的名稱)</label>
+                <input type="text" class="form-control" id="deviceName" placeholder="Enter device name" ref="device_name" name="User ID" disabled>
+                <label for="deviceName">User ID</label>
             </div>
 
             <div>
@@ -34,7 +34,7 @@ import { onBeforeUnmount, onMounted, ref } from 'vue';
 // import mqtt from 'mqtt/dist/mqtt.js';
 
 // const tempData = ref();
-
+const user_id = ref();
 var interval;
 onMounted(()=>{
     interval = setInterval(() => {
@@ -45,6 +45,19 @@ onMounted(()=>{
         //     deviceName.value = data['name'];
         // }
     }, 1000);
+
+    
+    if(localStorage.getItem("user") == null){
+        let str = "";
+        crypto.getRandomValues(new Uint8Array(64)).forEach(item=>{
+            str += String.fromCharCode(Math.floor(item % 127));
+        })
+        user_id.value = str;
+        localStorage.setItem("user", str);
+        console.log(localStorage.getItem("user"))
+    }else{
+        device_name.value.value = localStorage.getItem("user");
+    }
     
 
     // const client = mqtt.connect("wss://test.mosquitto.org:8081") // you add a ws:// url here

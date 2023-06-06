@@ -74,7 +74,16 @@ const mqttData = ref({});
 const client = mqtt.connect("wss://test.mosquitto.org:8081") // you add a ws:// url here
 client.on('connect', ()=>{
     console.log('connected.');
-    client.subscribe("ghnmwpioefmajqjhidhcwe/ttest")
+
+    if(localStorage.getItem("user") == null){
+        let str = "";
+        crypto.getRandomValues(new Uint8Array(64)).forEach(item=>{
+            str += String.fromCharCode(Math.floor(item % 127));
+        })
+        localStorage.setItem("user", str);
+    }
+
+    client.subscribe("steamedshrimp/"+localStorage.getItem("user")+"/#")
     client.on("message", function (topic, payload) {
         let temp = JSON.parse(payload)
         var d = new Date();
