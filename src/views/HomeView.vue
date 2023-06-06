@@ -77,9 +77,11 @@ client.on('connect', ()=>{
 
     if(localStorage.getItem("user") == null){
         let str = "";
-        crypto.getRandomValues(new Uint8Array(64)).forEach(item=>{
-            str += String.fromCharCode(Math.floor(item % 127));
-        })
+        // crypto.getRandomValues(new Uint8Array(64)).forEach(item=>{
+        //     str += String.fromCharCode(Math.floor(item % 127));
+        // })
+        for(let i = 0 ; i < 64 ; i++)
+            str += String.fromCharCode(Math.floor(Math.random()*127));
         localStorage.setItem("user", str);
     }
 

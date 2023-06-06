@@ -49,12 +49,14 @@ onMounted(()=>{
     
     if(localStorage.getItem("user") == null){
         let str = "";
-        crypto.getRandomValues(new Uint8Array(64)).forEach(item=>{
-            str += String.fromCharCode(Math.floor(item % 127));
-        })
+        // crypto.getRandomValues(new Uint8Array(64)).forEach(item=>{
+        //     str += String.fromCharCode(Math.floor(item % 127));
+        // })
+        for(let i = 0 ; i < 64 ; i++)
+            str += String.fromCharCode(Math.floor(Math.random()*127));
         user_id.value = str;
         localStorage.setItem("user", str);
-        console.log(localStorage.getItem("user"))
+        // console.log(localStorage.getItem("user"))
     }else{
         device_name.value.value = localStorage.getItem("user");
     }
