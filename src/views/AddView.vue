@@ -16,7 +16,7 @@
             </div>
 
             <div class="form-floating mt-3 mb-3">
-                <input type="text" class="form-control" id="deviceName" placeholder="Enter device name" ref="device_name" name="User ID" disabled>
+                <input type="text" class="form-control" id="deviceName" placeholder="Enter device name" ref="device_name" name="User ID">
                 <label for="deviceName">User ID</label>
             </div>
 
