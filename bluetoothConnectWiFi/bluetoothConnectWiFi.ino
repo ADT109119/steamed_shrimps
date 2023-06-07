@@ -332,7 +332,7 @@ void loop() {
       snprintf (msg, MSG_BUFFER_SIZE, "{\"t\":\"%f\", \"h\":\"%f\", \"name\":\"%s\"}", t, h, deviceName);
       // Serial.print("Publish message: ");
       // Serial.println(msg);
-      client.publish("ghnmwpioefmajqjhidhcwe/ttest", msg);
+      client.publish("steamedShrimp/ttest", msg);
     }
 
   }

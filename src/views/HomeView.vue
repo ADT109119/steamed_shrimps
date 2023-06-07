@@ -74,7 +74,7 @@ const mqttData = ref({});
 const client = mqtt.connect("wss://test.mosquitto.org:8081") // you add a ws:// url here
 client.on('connect', ()=>{
     console.log('connected.');
-    client.subscribe("ghnmwpioefmajqjhidhcwe/ttest")
+    client.subscribe("steamedShrimp/ttest")
     client.on("message", function (topic, payload) {
         let temp = JSON.parse(payload)
         var d = new Date();
