@@ -2,6 +2,7 @@
 #include <PubSubClient.h>
 #include <EEPROM.h>
 #include <DHT.h>
+#include <Adafruit_NeoPixel.h>
 
 
 const char* mqtt_server = "test.mosquitto.org";
@@ -40,8 +41,20 @@ char tempDeviceName[64] = "";
 
 //溫濕度感測
 #define DHTTYPE DHT11 // DHT 11
-uint8_t DHTPIN = D6;
+uint8_t DHTPIN = D7;
 DHT dht(DHTPIN, DHTTYPE);
+float temperature = 20.0;
+
+//燈條
+#define LED_PIN D6
+#define NUM_PIXELS 4
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUM_PIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
+
+//SERVO
+#include <Servo.h>
+#define SERVO_PIN D5
+Servo myservo;  // create servo object to control a servo
+int pos = 0;    // 設定 Servo 位置的變數
 
 
 void clearArr(char* arr, int len){
@@ -75,7 +88,7 @@ char* readFromEEPROM3(int Addr){
 }
 
 void setup_wifi(int mode) {
-
+  connected2Wifi = false;
   delay(10);
   // We start by connecting to a WiFi network
   Serial.println();
@@ -175,6 +188,11 @@ void setup() {
   // Serial.println(readFromEEPROM(SSID_ADDR));
   // Serial.print("PWD: ");
   // Serial.println(readFromEEPROM(PASSWORD_ADDR));
+  pixels.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
+  pixels.show();            // Turn OFF all pixels ASAP
+  pixels.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
+
+  myservo.attach(SERVO_PIN, 500, 2500);
 
   EEPROM.begin(256);
 
@@ -315,6 +333,7 @@ void loop() {
   // Serial.println(connected2Wifi);
   //連上WiFi後呼叫MQTT
   if(connected2Wifi) {
+    breath();
     // Serial.println("asdagrsgfhnghnghgfdrg");
     if(!client.connected())
       reconnect();
@@ -326,6 +345,10 @@ void loop() {
     if (now - lastMsg > 5000) {
       float h = dht.readHumidity();
       float t = dht.readTemperature();
+      temperature = t;
+
+      pos = t;
+      myservo.write(pos);
 
       lastMsg = now;
       ++value;
@@ -337,4 +360,56 @@ void loop() {
 
   }
 
+}
+
+void breath(){
+  Serial.println(temperature);
+  // if(isnan(temperature)) {
+  //   pixels.setBrightness(0); // 熄滅燈條
+  //   pixels.show();
+  //   delay(1000);
+  //   return;
+  // }
+
+  int redValue = 0;
+  int greenValue = 0;
+  int blueValue = 0;
+
+  if(temperature >= 35) {
+    redValue = 255;
+  } else if(temperature <= 15) {
+    blueValue = 255;
+  } else {
+    float range = 35 - 15;
+    float temperatureInRange = temperature - 15;
+    float percentage = temperatureInRange / range;
+
+    if(percentage < 0) {
+      percentage = 0;
+    } else if(percentage > 1) {
+      percentage = 1;
+    }
+
+    redValue = 255 * percentage;
+    blueValue = 255 * (1 - percentage);
+  }
+
+  // 呼吸燈效果
+  for(int brightness=0; brightness<=255; brightness++) {
+    for(int i=0; i<NUM_PIXELS; i++) {
+      pixels.setPixelColor(i, pixels.Color(redValue, greenValue, blueValue));
+    }
+    pixels.setBrightness(brightness);
+    pixels.show();
+    delay(5);
+  }
+
+  for(int brightness=255; brightness>=0; brightness--) {
+    for(int i=0; i<NUM_PIXELS; i++) {
+      pixels.setPixelColor(i, pixels.Color(redValue, greenValue, blueValue));
+    }
+    pixels.setBrightness(brightness);
+    pixels.show();
+    delay(5);
+  }
 }
