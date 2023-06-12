@@ -74,7 +74,7 @@ onMounted(()=>{
 
     if( window.AppInventor ){
         let data = JSON.parse(window.AppInventor.getWebViewString());
-		if (data.name == "userid") {
+		if (data.name == "userid" && data){
 			if(data.user_id == "not found"){
                 let str = "";
                 crypto.getRandomValues(new Uint8Array(64)).forEach(item=>{
