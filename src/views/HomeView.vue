@@ -133,7 +133,7 @@ onBeforeUnmount(()=>{
 })
 
 watch(()=>user_id.value, (newVal)=>{
-    alert("steamedShrimp/"+newVal)
+    // alert("steamedShrimp/"+newVal)
     client.subscribe("steamedShrimp/"+newVal)
     client.on("message", function (topic, payload) {
         let temp = JSON.parse(payload)

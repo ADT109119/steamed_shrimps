@@ -36,10 +36,10 @@ char* password = "";
 char* deviceName = "";
 char tempInput[64] = "";
 char tempPwdInput[64] = "";
-char tempDeviceName[65] = "";
+char tempUserId[65] = "";
 #define SSID_ADDR 0
 #define PASSWORD_ADDR 34
-#define DEVICE_NAME_ADDR 100
+#define USER_ID_ADDR 100
 
 //溫濕度感測
 #define DHTTYPE DHT11 // DHT 11
@@ -83,6 +83,14 @@ char* readFromEEPROM2(int Addr){
 
 char* readFromEEPROM3(int Addr){
   static char arr[64];
+  for(int i = Addr ; i < EEPROM.read(Addr)+Addr ; i++){
+    arr[i-Addr] = EEPROM.read(i+1);
+  }
+  return arr;
+}
+
+char* readFromEEPROM4(int Addr){
+  static char arr[65];
   for(int i = Addr ; i < EEPROM.read(Addr)+Addr ; i++){
     arr[i-Addr] = EEPROM.read(i+1);
   }
@@ -196,14 +204,15 @@ void setup() {
 
   myservo.attach(SERVO_PIN, 500, 2500);
 
-  EEPROM.begin(256);
+  EEPROM.begin(512);
 
   // ssid = readFromEEPROM(SSID_ADDR);
   // password = readFromEEPROM(PASSWORD_ADDR);
-  deviceName = readFromEEPROM3(DEVICE_NAME_ADDR);
-  Serial.println(deviceName);
 
   delay(1000);
+
+  deviceName = readFromEEPROM4(USER_ID_ADDR);
+  Serial.println(deviceName);
 
   setup_wifi(0);
 
@@ -238,6 +247,7 @@ void loop() {
         EEPROM.write(0, length);
         Serial.println(length);
         inputIndex = 0;
+        connected2Wifi = false;
         clearArr(tempInput, 64);
         clearArr(tempPwdInput, 64);
         clearArr(ssid, 64);
@@ -295,14 +305,14 @@ void loop() {
         length = (int)val;
         Serial.println(length);
 
-        EEPROM.write(DEVICE_NAME_ADDR, length);
+        EEPROM.write(USER_ID_ADDR, length);
         inputIndex = 0;
         break;
 
       case 5:
         Serial.println(inputIndex);
-        tempDeviceName[inputIndex] = val;
-        EEPROM.write(DEVICE_NAME_ADDR + inputIndex+1, (int)val);
+        tempUserId[inputIndex] = val;
+        EEPROM.write(USER_ID_ADDR + inputIndex+1, (int)val);
         inputIndex++;
         if(inputIndex+1 > length){
           mode = 0;
@@ -313,7 +323,7 @@ void loop() {
           // password = readFromEEPROM(PASSWORD_ADDR);
           Serial.println(readFromEEPROM(SSID_ADDR));
           Serial.println(readFromEEPROM(PASSWORD_ADDR));
-          Serial.println(readFromEEPROM(DEVICE_NAME_ADDR));
+          Serial.println(readFromEEPROM(USER_ID_ADDR));
           // strcat(password, tempPwdInput);
           setup_wifi(1);
           // Serial.println(password);
@@ -328,9 +338,11 @@ void loop() {
   }
 
   // 5秒未接收到藍牙訊號就終止輸入模式
-  if(millis() - lastBlueToothMsg > 5000)
+  if(millis() - lastBlueToothMsg > 5000){
     mode = 0;
-
+    if(WiFi.status() == WL_CONNECTED)
+      connected2Wifi = true;
+  }
 
   // Serial.println(connected2Wifi);
   //連上WiFi後呼叫MQTT
@@ -358,7 +370,8 @@ void loop() {
       snprintf (msg, MSG_BUFFER_SIZE, "{\"t\":\"%f\", \"h\":\"%f\", \"name\":\"%s\"}", t, h, "deviceName");
       snprintf (mqttChannel, mqttChannel_BUFFER_SIZE, "steamedShrimp/%s", deviceName);
       // Serial.print("Publish message: ");
-      // Serial.println(msg);
+      Serial.println(deviceName);
+      Serial.println(mqttChannel);
       // client.publish("steamedShrimp/ttest", msg);
       client.publish(mqttChannel, msg);
     }
