@@ -46,7 +46,7 @@
 <script setup>
 // import HelloWorld from '@/components/HelloWorld.vue'
 import tempDisplayer from '@/components/tempDisplayer.vue';
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import mqtt from 'mqtt/dist/mqtt.js';
 import sha256L from 'js-sha256';
@@ -64,7 +64,7 @@ const gotoPath = (newPath)=>{
 
 const checkHaveTemp = ref(false);
 const checkFiveSecond = ref(false);
-let user_id;
+const user_id = ref();
 
 let sha256 = sha256L.sha256
 onMounted(()=>{
@@ -80,7 +80,7 @@ onMounted(()=>{
                 })
             );
         }
-        
+
         let data = JSON.parse(window.AppInventor.getWebViewString());
 		if (data.name == "userid"){
 			if(data.user_id == "not found"){
@@ -96,7 +96,7 @@ onMounted(()=>{
                     })
                 );
             }else{
-                user_id = data.user_id;
+                user_id.value = data.user_id;
             }
 		}else{
 			window.AppInventor.setWebViewString(
@@ -117,36 +117,38 @@ onMounted(()=>{
     }
 
 
-        
-    const mqttData = ref({});
-
-    client.on('connect', ()=>{
-        console.log('connected.');
-        client.subscribe("steamedShrimp/"+user_id)
-        client.on("message", function (topic, payload) {
-            let temp = JSON.parse(payload)
-            var d = new Date();
-            d.setUTCHours(d.getUTCHours() +8)
-            temp["time"] = d.toISOString();
-            console.log(temp)
-            mqttData.value[topic] = temp;
-            checkHaveTemp.value = true;
-            // console.log(topic);
-            // console.log(payload);
-            console.log([topic, payload].join(": "));
-            // console.log(JSON.parse(payload));
-            // client.end()
-        });
-
-        // client.publish("ghnmwpioefmajqjhidhcwe/ttest", "hello");
-    });
-
 })
 
 const client = mqtt.connect("wss://test.mosquitto.org:8081") // you add a ws:// url here
+const mqttData = ref({});
+
+client.on('connect', ()=>{
+    console.log('connected.');
+
+    // client.publish("ghnmwpioefmajqjhidhcwe/ttest", "hello");
+});
 
 onBeforeUnmount(()=>{
     client.end();
+})
+
+watch(()=>user_id.value, (newVal)=>{
+    client.subscribe("steamedShrimp/"+newVal)
+    client.on("message", function (topic, payload) {
+        let temp = JSON.parse(payload)
+        var d = new Date();
+        d.setUTCHours(d.getUTCHours() +8)
+        temp["time"] = d.toISOString();
+        console.log(temp)
+        mqttData.value[topic] = temp;
+        checkHaveTemp.value = true;
+        // console.log(topic);
+        // console.log(payload);
+        console.log([topic, payload].join(": "));
+        // console.log(JSON.parse(payload));
+        // client.end()
+    });
+
 })
 
 </script>
