@@ -16,9 +16,15 @@
             </div>
 
             <div class="form-floating mt-3 mb-3">
-                <input type="text" class="form-control" id="deviceName" placeholder="Enter device name" ref="device_name" name="deviceName" :disabled="!blueToothConnected">
-                <label for="deviceName">裝置名稱(顯示在APP的名稱)</label>
+                <input type="text" class="form-control" id="deviceName" placeholder="Enter device name" ref="device_name" name="deviceName" disabled>
+                <label for="deviceName">使用者ID(用作區分不同使用者)</label>
             </div>
+
+            <!-- <div class="form-floating mt-3 mb-3">
+                <input type="text" class="form-control" id="userid" placeholder="Enter device name" ref="user_id" name="userid" disabled>
+                <label for="deviceName">裝置名稱(顯示在APP的名稱)</label>
+            </div> -->
+
 
             <div>
                 <button class="btn btn-success" :disabled="!blueToothConnected" @click="sendWifiData()">送出並連接</button>
@@ -31,10 +37,12 @@
 
 <script setup>
 import { onBeforeUnmount, onMounted, ref } from 'vue';
+import sha256L from 'js-sha256';
 // import mqtt from 'mqtt/dist/mqtt.js';
 
 // const tempData = ref();
-
+// const user_id = ref();
+let sha256 = sha256L.sha256
 var interval;
 onMounted(()=>{
     interval = setInterval(() => {
@@ -44,9 +52,23 @@ onMounted(()=>{
         //     let data = JSON.parse(appInventorInput);
         //     deviceName.value = data['name'];
         // }
+        
     }, 1000);
     
+    if(localStorage.getItem("user") == null){
+        let str = "";
+        crypto.getRandomValues(new Uint8Array(64)).forEach(item=>{
+            str += String.fromCharCode(Math.floor(item % 127));
+        })
+        device_name.value = sha256(str);
+        console.log(sha256(str));
+        localStorage.setItem("user", sha256(str));
+        // console.log(localStorage.getItem("user"))
+    }else{
+        device_name.value.value = localStorage.getItem("user");
+        // console.log(sha256(localStorage.getItem("user")));
 
+    }
     // const client = mqtt.connect("wss://test.mosquitto.org:8081") // you add a ws:// url here
     // client.on('connect', ()=>{
     //     console.log('connected.');

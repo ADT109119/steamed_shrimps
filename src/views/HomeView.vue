@@ -49,6 +49,7 @@ import tempDisplayer from '@/components/tempDisplayer.vue';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import mqtt from 'mqtt/dist/mqtt.js';
+import sha256L from 'js-sha256';
 
 const listButton = ref();
 const router = useRouter();
@@ -63,10 +64,22 @@ const gotoPath = (newPath)=>{
 
 const checkHaveTemp = ref(false);
 const checkFiveSecond = ref(false);
+
+let sha256 = sha256L.sha256
 onMounted(()=>{
     setTimeout(()=>{
         checkFiveSecond.value = true;
     }, 5000)
+
+    if(localStorage.getItem("user") == null){
+        let str = "";
+        crypto.getRandomValues(new Uint8Array(64)).forEach(item=>{
+            str += String.fromCharCode(Math.floor(item % 127));
+        })
+        localStorage.setItem("user", sha256(str));
+        // console.log(localStorage.getItem("user"))
+    }
+
 })
 
 const mqttData = ref({});
@@ -74,7 +87,7 @@ const mqttData = ref({});
 const client = mqtt.connect("wss://test.mosquitto.org:8081") // you add a ws:// url here
 client.on('connect', ()=>{
     console.log('connected.');
-    client.subscribe("steamedShrimp/ttest")
+    client.subscribe("steamedShrimp/"+localStorage.getItem("user"))
     client.on("message", function (topic, payload) {
         let temp = JSON.parse(payload)
         var d = new Date();

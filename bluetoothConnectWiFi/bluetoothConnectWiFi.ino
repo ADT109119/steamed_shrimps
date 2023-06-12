@@ -11,6 +11,8 @@ PubSubClient client(espClient);
 unsigned long lastMsg = 0;
 #define MSG_BUFFER_SIZE	(100)
 char msg[MSG_BUFFER_SIZE];
+#define mqttChannel_BUFFER_SIZE	(128)
+char mqttChannel[mqttChannel_BUFFER_SIZE];
 int value = 0;
 unsigned long lastBlueToothMsg = 0;
 
@@ -34,7 +36,7 @@ char* password = "";
 char* deviceName = "";
 char tempInput[64] = "";
 char tempPwdInput[64] = "";
-char tempDeviceName[64] = "";
+char tempDeviceName[65] = "";
 #define SSID_ADDR 0
 #define PASSWORD_ADDR 34
 #define DEVICE_NAME_ADDR 100
@@ -347,15 +349,18 @@ void loop() {
       float t = dht.readTemperature();
       temperature = t;
 
-      pos = t;
+      pos = getRotate(t, 35, 15, 35, 0);
+      Serial.println(pos);
       myservo.write(pos);
 
       lastMsg = now;
       ++value;
-      snprintf (msg, MSG_BUFFER_SIZE, "{\"t\":\"%f\", \"h\":\"%f\", \"name\":\"%s\"}", t, h, deviceName);
+      snprintf (msg, MSG_BUFFER_SIZE, "{\"t\":\"%f\", \"h\":\"%f\", \"name\":\"%s\"}", t, h, "deviceName");
+      snprintf (mqttChannel, mqttChannel_BUFFER_SIZE, "steamedShrimp/%s", deviceName);
       // Serial.print("Publish message: ");
       // Serial.println(msg);
-      client.publish("steamedShrimp/ttest", msg);
+      // client.publish("steamedShrimp/ttest", msg);
+      client.publish(mqttChannel, msg);
     }
 
   }
@@ -412,4 +417,15 @@ void breath(){
     pixels.show();
     delay(5);
   }
+}
+
+int getRotate(int t, int maxT, int minT, int maxR, int minR){
+  if(t >= maxT)
+    return maxR;
+  
+  if(t = minT)
+    return minR;
+
+  // (minR - s) = ((minT - t)/(minT-maxT) * (maxR-minR);
+  return ((float)(minT - t)/(float)(minT-maxT) * (float)(maxR-minR) + minR);;
 }
