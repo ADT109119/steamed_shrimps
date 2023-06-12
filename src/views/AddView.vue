@@ -54,21 +54,48 @@ onMounted(()=>{
         // }
         
     }, 1000);
-    
-    if(localStorage.getItem("user") == null){
-        let str = "";
-        crypto.getRandomValues(new Uint8Array(64)).forEach(item=>{
-            str += String.fromCharCode(Math.floor(item % 127));
-        })
-        device_name.value = sha256(str);
-        console.log(sha256(str));
-        localStorage.setItem("user", sha256(str));
-        // console.log(localStorage.getItem("user"))
-    }else{
-        device_name.value.value = localStorage.getItem("user");
-        // console.log(sha256(localStorage.getItem("user")));
 
-    }
+    if( window.AppInventor ){
+        let data = JSON.parse(window.AppInventor.getWebViewString());
+		if (data.name == "userid") {
+			if(data.user_id == "not found"){
+                let str = "";
+                crypto.getRandomValues(new Uint8Array(64)).forEach(item=>{
+                    str += String.fromCharCode(Math.floor(item % 127));
+                })
+
+                window.AppInventor.setWebViewString(
+                    JSON.stringify({
+                        function_name: "setUserId",
+                        user_id: sha256(str)
+                    })
+                );
+            }else{
+                device_name.value.value = data.user_id;
+            }
+		}else{
+			window.AppInventor.setWebViewString(
+                JSON.stringify({
+                    function_name: "getUserId"
+                })
+            );
+		}	
+	}
+    
+    // if(localStorage.getItem("user") == null){
+    //     let str = "";
+    //     crypto.getRandomValues(new Uint8Array(64)).forEach(item=>{
+    //         str += String.fromCharCode(Math.floor(item % 127));
+    //     })
+    //     device_name.value = sha256(str);
+    //     console.log(sha256(str));
+    //     localStorage.setItem("user", sha256(str));
+    //     // console.log(localStorage.getItem("user"))
+    // }else{
+    //     device_name.value.value = localStorage.getItem("user");
+    //     // console.log(sha256(localStorage.getItem("user")));
+
+    // }
     // const client = mqtt.connect("wss://test.mosquitto.org:8081") // you add a ws:// url here
     // client.on('connect', ()=>{
     //     console.log('connected.');

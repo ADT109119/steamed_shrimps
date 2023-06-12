@@ -64,12 +64,40 @@ const gotoPath = (newPath)=>{
 
 const checkHaveTemp = ref(false);
 const checkFiveSecond = ref(false);
+let user_id;
 
 let sha256 = sha256L.sha256
 onMounted(()=>{
     setTimeout(()=>{
         checkFiveSecond.value = true;
     }, 5000)
+
+    if( window.AppInventor ){
+        let data = JSON.parse(window.AppInventor.getWebViewString());
+		if (data.name == "userid") {
+			if(data.user_id == "not found"){
+                let str = "";
+                crypto.getRandomValues(new Uint8Array(64)).forEach(item=>{
+                    str += String.fromCharCode(Math.floor(item % 127));
+                })
+
+                window.AppInventor.setWebViewString(
+                    JSON.stringify({
+                        function_name: "setUserId",
+                        user_id: sha256(str)
+                    })
+                );
+            }else{
+                user_id = data.user_id;
+            }
+		}else{
+			window.AppInventor.setWebViewString(
+                JSON.stringify({
+                    function_name: "getUserId"
+                })
+            );
+		}	
+	}
 
     if(localStorage.getItem("user") == null){
         let str = "";
@@ -80,31 +108,34 @@ onMounted(()=>{
         // console.log(localStorage.getItem("user"))
     }
 
-})
 
-const mqttData = ref({});
+        
+    const mqttData = ref({});
 
-const client = mqtt.connect("wss://test.mosquitto.org:8081") // you add a ws:// url here
-client.on('connect', ()=>{
-    console.log('connected.');
-    client.subscribe("steamedShrimp/"+localStorage.getItem("user"))
-    client.on("message", function (topic, payload) {
-        let temp = JSON.parse(payload)
-        var d = new Date();
-        d.setUTCHours(d.getUTCHours() +8)
-        temp["time"] = d.toISOString();
-        console.log(temp)
-        mqttData.value[topic] = temp;
-        checkHaveTemp.value = true;
-        // console.log(topic);
-        // console.log(payload);
-        console.log([topic, payload].join(": "));
-        // console.log(JSON.parse(payload));
-        // client.end()
+    client.on('connect', ()=>{
+        console.log('connected.');
+        client.subscribe("steamedShrimp/"+user_id)
+        client.on("message", function (topic, payload) {
+            let temp = JSON.parse(payload)
+            var d = new Date();
+            d.setUTCHours(d.getUTCHours() +8)
+            temp["time"] = d.toISOString();
+            console.log(temp)
+            mqttData.value[topic] = temp;
+            checkHaveTemp.value = true;
+            // console.log(topic);
+            // console.log(payload);
+            console.log([topic, payload].join(": "));
+            // console.log(JSON.parse(payload));
+            // client.end()
+        });
+
+        // client.publish("ghnmwpioefmajqjhidhcwe/ttest", "hello");
     });
 
-    // client.publish("ghnmwpioefmajqjhidhcwe/ttest", "hello");
-});
+})
+
+const client = mqtt.connect("wss://test.mosquitto.org:8081") // you add a ws:// url here
 
 onBeforeUnmount(()=>{
     client.end();
