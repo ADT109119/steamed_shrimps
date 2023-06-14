@@ -361,7 +361,7 @@ void loop() {
       float t = dht.readTemperature();
       temperature = t;
 
-      pos = getRotate(t, 35, 15, 35, 0);
+      pos = getRotate(t, 35, 15, 0, 35);
       Serial.println(pos);
       myservo.write(pos);
 
@@ -436,7 +436,7 @@ int getRotate(int t, int maxT, int minT, int maxR, int minR){
   if(t >= maxT)
     return maxR;
   
-  if(t = minT)
+  if(t <= minT)
     return minR;
 
   // (minR - s) = ((minT - t)/(minT-maxT) * (maxR-minR);
